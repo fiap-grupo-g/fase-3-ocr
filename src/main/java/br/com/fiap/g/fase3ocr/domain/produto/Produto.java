@@ -1,14 +1,8 @@
 package br.com.fiap.g.fase3ocr.domain.produto;
 
 import br.com.fiap.g.fase3ocr.domain.cupom.CupomFiscal;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "PRODUTO")
@@ -45,9 +39,17 @@ public class Produto {
         return this;
     }
 
+    public int getItemN() {
+        return itemN;
+    }
+
     public Produto setItemN(int itemN) {
         this.itemN = itemN;
         return this;
+    }
+
+    public String getCodigo() {
+        return codigo;
     }
 
     public Produto setCodigo(String codigo) {
@@ -55,9 +57,17 @@ public class Produto {
         return this;
     }
 
+    public String getDescricao() {
+        return descricao;
+    }
+
     public Produto setDescricao(String descricao) {
         this.descricao = descricao;
         return this;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
     }
 
     public Produto setQuantidade(int quantidade) {
@@ -65,29 +75,13 @@ public class Produto {
         return this;
     }
 
+    public String getValor() {
+        return valor;
+    }
+
     public Produto setValor(String valor) {
         this.valor = valor;
         return this;
-    }
-
-    public int getItemN() {
-        return itemN;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public int getQuantidade() {
-        return quantidade;
-    }
-
-    public String getValor() {
-        return valor;
     }
 
     @Override

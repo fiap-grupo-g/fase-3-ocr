@@ -1,21 +1,27 @@
 package br.com.fiap.g.fase3ocr.domain.ocr;
 
-import br.com.fiap.g.fase3ocr.domain.ocr.provider.OcrProviderService;
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.TesseractException;
+
 import java.awt.image.BufferedImage;
 
 public class OcrService {
 
-    OcrProviderService ocrProviderService;
-    OcrPayloadFactory ocrPayloadFactory;
+    private static final String EMPTY = "";
 
-    public OcrService(OcrProviderService ocrProviderService,
-            OcrPayloadFactory ocrPayloadFactory) {
-        this.ocrProviderService = ocrProviderService;
-        this.ocrPayloadFactory = ocrPayloadFactory;
+    private final ITesseract tesseract;
+
+    public OcrService(ITesseract tesseract) {
+        this.tesseract = tesseract;
     }
 
-    public OcrPayload read(BufferedImage image) {
-        String payload = ocrProviderService.readImage(image);
-        return ocrPayloadFactory.create(payload);
+    public String readImage(BufferedImage image) {
+        try {
+            return tesseract.doOCR(image);
+        } catch (TesseractException e) {
+            e.printStackTrace();
+        }
+
+        return EMPTY;
     }
 }

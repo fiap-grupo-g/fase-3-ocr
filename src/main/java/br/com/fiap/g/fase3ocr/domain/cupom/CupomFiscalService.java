@@ -1,57 +1,47 @@
 package br.com.fiap.g.fase3ocr.domain.cupom;
 
-import br.com.fiap.g.fase3ocr.domain.ImageUtils;
-import br.com.fiap.g.fase3ocr.domain.cv.CvImage;
-import br.com.fiap.g.fase3ocr.domain.cv.CvService;
 import br.com.fiap.g.fase3ocr.domain.ocr.OcrService;
-import br.com.fiap.g.fase3ocr.domain.ocr.provider.OcrProviderService;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.fiap.g.fase3ocr.domain.opencv.OpenCvService;
+import io.undertow.util.BadRequestException;
 import org.springframework.stereotype.Service;
+
+import static br.com.fiap.g.fase3ocr.domain.ImageUtils.base64ToImage;
 
 @Service
 public class CupomFiscalService {
 
-    private CvService cvService;
-    private OcrService ocrService;
+    private final OcrService ocrService;
+    private final OpenCvService openCvService;
+    private final CupomFiscalParser cupomFiscalParser;
 
-    @Autowired
-    public CupomFiscalService(
-            OcrProviderService ocrProviderService,
-            CvService cvService) {
-        this.cvService = cvService;
-        this.ocrService = new OcrService(ocrProviderService, new CupomFiscalFactory());
+    public CupomFiscalService(OpenCvService openCvService, OcrService ocrService, CupomFiscalParser cupomFiscalParser) {
+        this.openCvService = openCvService;
+        this.ocrService = ocrService;
+        this.cupomFiscalParser = cupomFiscalParser;
     }
 
-    public CupomFiscal create(CupomFiscalDocument cupomFiscalDocument) {
-        BufferedImage image = base64FileToImage(cupomFiscalDocument.getBase64File());
-        CvImage cvImage = cvService.createCvImage(image);
+    public CupomFiscal create(CupomFiscalDocument cupomFiscalDocument) throws BadRequestException {
+        var cupomFiscal = new CupomFiscal();
+        var image = base64ToImage(cupomFiscalDocument.getBase64File());
+        var processedImage = openCvService.processImage(image);
 
-        CupomFiscal cupomFiscal = null;
 
-        while (
-            cvImage.hasNext() &&                                    // has more processing options
-            (cupomFiscal == null || !cupomFiscal.isComplete())       // hasn't found complete payload
-        ) {
-            CupomFiscal result = (CupomFiscal) ocrService.read(cvImage.getProcessedImage());
+        processedImage.forEach(bufferedImage -> {
+            var payload = ocrService.readImage(bufferedImage);
+            var result = cupomFiscalParser.create(payload);
 
-            if (cupomFiscal == null) cupomFiscal = result;
-            else cupomFiscal.merge(result);
-        }
+            if (result != null) {
+                cupomFiscal.merge(result);
+            }
+        });
+
+//        if (!cupomFiscal.isComplete()) {
+//            throw new BadRequestException("Cupom inválido ou qualidade baixa");
+//        }
 
         cupomFiscal.setCupomFiscalDocument(cupomFiscalDocument);
         // save to database
 
         return cupomFiscal;
-    }
-
-    private BufferedImage base64FileToImage(String base64File) {
-        try {
-            return ImageUtils.base64ToImage(base64File);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null; // throw exception
-        }
     }
 }

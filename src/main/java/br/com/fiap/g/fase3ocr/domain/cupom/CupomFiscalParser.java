@@ -1,13 +1,14 @@
 package br.com.fiap.g.fase3ocr.domain.cupom;
 
-import br.com.fiap.g.fase3ocr.domain.ocr.OcrPayloadFactory;
 import br.com.fiap.g.fase3ocr.domain.produto.Produto;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
+@Service
+public class CupomFiscalParser {
 
     private static final String CNPJ_REGEX = "\\d{2}(\\.|,|:)\\d{3}(\\.|,|:)\\d{3}\\/\\d{4}(-| )?\\d{2}";
     private static final String CPF_REGEX = "\\d{3}(\\.|,|:)\\d{3}(\\.|,|:)\\d{3}(-| )\\d{2}";
@@ -22,9 +23,8 @@ public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
     private static final String PRODUTO_REGEX_1 = "(^\\d{3})\\s+(\\d*)\\s+([\\s\\S]*)(?=(\\s\\d*,\\d*Un))[\\s\\S]*(?=(\\s\\d*,\\d{2}))";
     private static final String PRODUTO_REGEX_2 = "(^\\d{3})\\s+([a-zA-Z0-9]*)\\s+([\\s\\S]*)[\\s\\S]*(?=(\\s\\d*,\\d{2}))";
 
-    @Override
     public CupomFiscal create(String payload) {
-        CupomFiscal cupomFiscal = new CupomFiscal();
+        var cupomFiscal = new CupomFiscal();
 
         cupomFiscal.setCnpjEstabelecimento(findCnpjEstabelecimento(payload));
         cupomFiscal.setDocumentoConsumidor(findDocumentoConsumidor(payload));
@@ -36,30 +36,30 @@ public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
     }
 
     private String findCnpjEstabelecimento(String payload) {
-        Pattern p = Pattern.compile(CNPJ_REGEX);
-        Matcher m = p.matcher(payload);
+        var p = Pattern.compile(CNPJ_REGEX);
+        var m = p.matcher(payload);
         return m.find() ? m.group(0) : null;
     }
 
     private String findDocumentoConsumidor(String payload) {
-        Pattern p = Pattern.compile(CPF_REGEX);
-        Matcher m = p.matcher(payload);
+        var p = Pattern.compile(CPF_REGEX);
+        var m = p.matcher(payload);
         return m.find() ? m.group(0) : null;
     }
 
     private String findValorTotal(String payload) {
-        Pattern p1 = Pattern.compile(TOTAL_VALUE_1);
-        Matcher m1 = p1.matcher(payload);
+        var p1 = Pattern.compile(TOTAL_VALUE_1);
+        var m1 = p1.matcher(payload);
         if (m1.find()) {
             return m1.group(1);
         }
-        Pattern p2 = Pattern.compile(TOTAL_VALUE_2);
-        Matcher m2 = p2.matcher(payload);
+        var p2 = Pattern.compile(TOTAL_VALUE_2);
+        var m2 = p2.matcher(payload);
         if (m2.find()) {
             return m2.group(1);
         }
-        Pattern p3 = Pattern.compile(TOTAL_VALUE_3);
-        Matcher m3 = p3.matcher(payload);
+        var p3 = Pattern.compile(TOTAL_VALUE_3);
+        var m3 = p3.matcher(payload);
         if (m3.find()) {
             return m3.group(1);
         }
@@ -67,24 +67,23 @@ public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
     }
 
     private List<Produto> findProdutos(String payload) {
-        Pattern p = Pattern.compile(PRODUCT_LINES);
-        Matcher m = p.matcher(payload);
+        var p = Pattern.compile(PRODUCT_LINES);
+        var m = p.matcher(payload);
         if (m.find()) {
-            String productLines = m.group(m.groupCount());
-            List<Produto> produtos = new ArrayList<>();
-            Boolean isLast = false;
+            var productLines = m.group(m.groupCount());
+            var produtos = new ArrayList<Produto>();
+            var isLast = false;
 
             while (!isLast) {
-                Pattern p2 = Pattern.compile(PRODUCT_LINE_MIDDLE);
-                Matcher m2 = p2.matcher(productLines);
+                var p2 = Pattern.compile(PRODUCT_LINE_MIDDLE);
+                var m2 = p2.matcher(productLines);
                 if (m2.find()) {
                     produtos.add(createProduto(m2.group(0)));
                     productLines = m2.replaceFirst("");
-                }
-                else {
+                } else {
                     isLast = true;
-                    Pattern p3 = Pattern.compile(PRODUCT_LINE_END);
-                    Matcher m3 = p3.matcher(productLines);
+                    var p3 = Pattern.compile(PRODUCT_LINE_END);
+                    var m3 = p3.matcher(productLines);
                     if (m3.find()) {
                         produtos.add(createProduto(m3.group(0)));
                     }
@@ -96,9 +95,9 @@ public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
     }
 
     private Produto createProduto(String payload) {
-        Produto produto = new Produto();
-        Pattern p = Pattern.compile(PRODUTO_REGEX_1);
-        Matcher m = p.matcher(payload);
+        var produto = new Produto();
+        var p = Pattern.compile(PRODUTO_REGEX_1);
+        var m = p.matcher(payload);
         if (m.find()) {
             produto.setItemN(Integer.parseInt(m.group(1)));
             produto.setCodigo(m.group(2));
@@ -107,8 +106,8 @@ public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
             produto.setValor(m.group(5));
             return produto;
         }
-        Pattern p2 = Pattern.compile(PRODUTO_REGEX_2);
-        Matcher m2 = p2.matcher(payload);
+        var p2 = Pattern.compile(PRODUTO_REGEX_2);
+        var m2 = p2.matcher(payload);
         if (m2.find()) {
             produto.setItemN(Integer.parseInt(m2.group(1)));
             produto.setCodigo(m2.group(2));
