@@ -16,6 +16,6 @@ public class OcrService {
 
     public OcrPayload read(BufferedImage image) {
         String payload = ocrProviderService.readImage(image);
-        return ocrPayloadFactory.create(payload);
+        return ocrPayloadFactory.create(payload, image);
     }
 }
