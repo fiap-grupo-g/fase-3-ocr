@@ -38,21 +38,21 @@ public class CupomFiscalController {
     public CupomFiscal read(@RequestBody CupomFiscalDocument cupomFiscalDocument) {
         return cupomFiscalService.create(cupomFiscalDocument);
     }
-//
-//    @PostMapping(value = "/read-image")
-//    public void read(@RequestBody CupomFiscalDocument cupomFiscalDocument, HttpServletResponse response)
-//            throws IOException {
-//
-//        BufferedImage image = base64ToImage(cupomFiscalDocument.getBase64File());
-//        CvImage cvImage = cvService.createCvImage(image);
-//
-//        BufferedImage result = cvImage.getProcessedImage();
-//
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        ImageIO.write(result, "PNG", outputStream);
-//        outputStream.writeTo(response.getOutputStream());
-//
-//    }
+
+    @PostMapping(value = "/read-image")
+    public void read(@RequestBody CupomFiscalDocument cupomFiscalDocument, HttpServletResponse response)
+            throws IOException {
+
+        BufferedImage image = base64ToImage(cupomFiscalDocument.getBase64File());
+        CvImage cvImage = cvService.createCvImage(image);
+
+        BufferedImage result = cvImage.getProcessedImage();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(result, "PNG", outputStream);
+        outputStream.writeTo(response.getOutputStream());
+
+    }
 
     public static BufferedImage base64ToImage(String base64File) throws IOException {
         byte[] imageBytes = Base64.getDecoder().decode(base64File);
