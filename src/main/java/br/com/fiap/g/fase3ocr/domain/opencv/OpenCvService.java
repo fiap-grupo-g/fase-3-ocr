@@ -21,12 +21,12 @@ public class OpenCvService {
     }
 
     public List<BufferedImage> processImage(BufferedImage bufferedImage) {
-        var image = OpenCvUtils.bufferedImage2Mat(bufferedImage);
-        var greyImage = toGrey(image);
+        Mat image = OpenCvUtils.bufferedImage2Mat(bufferedImage);
+        Mat greyImage = toGrey(image);
 
-        var bilateral = withBilateralFilter(greyImage);
-        var skewFilter = withSkewFilter(greyImage);
-        var GaussianAndSkewFilter = withGaussianAndSkewFilter(greyImage);
+        CompletableFuture<Mat> bilateral = withBilateralFilter(greyImage);
+        CompletableFuture<Mat> skewFilter = withSkewFilter(greyImage);
+        CompletableFuture<Mat> GaussianAndSkewFilter = withGaussianAndSkewFilter(greyImage);
 
         return Stream.of(bilateral, skewFilter, GaussianAndSkewFilter)
                 .map(CompletableFuture::join)
@@ -43,7 +43,7 @@ public class OpenCvService {
     @Async
     private CompletableFuture<Mat> withSkewFilter(final Mat greyImage) {
         return CompletableFuture.supplyAsync(() -> {
-            var processedSkewImage = reSize(greyImage);
+            Mat processedSkewImage = reSize(greyImage);
             deSkew(processedSkewImage);
             return bilateralFilter(processedSkewImage);
         });
@@ -52,7 +52,7 @@ public class OpenCvService {
     @Async
     private CompletableFuture<Mat> withGaussianAndSkewFilter(final Mat greyImage) {
         return CompletableFuture.supplyAsync(() -> {
-            var processedGaussianSkewImage = reSize(greyImage);
+            Mat processedGaussianSkewImage = reSize(greyImage);
             deSkew(processedGaussianSkewImage);
             processedGaussianSkewImage = gaussianAdaptiveThresholding(processedGaussianSkewImage);
             return morphologicalOpening(processedGaussianSkewImage);

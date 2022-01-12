@@ -5,6 +5,9 @@ import br.com.fiap.g.fase3ocr.domain.opencv.OpenCvService;
 import io.undertow.util.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.awt.image.BufferedImage;
+import java.util.List;
+
 import static br.com.fiap.g.fase3ocr.domain.ImageUtils.base64ToImage;
 
 @Service
@@ -20,24 +23,19 @@ public class CupomFiscalService {
         this.cupomFiscalParser = cupomFiscalParser;
     }
 
-    public CupomFiscal create(CupomFiscalDocument cupomFiscalDocument) throws BadRequestException {
-        var cupomFiscal = new CupomFiscal();
-        var image = base64ToImage(cupomFiscalDocument.getBase64File());
-        var processedImage = openCvService.processImage(image);
-
+    public CupomFiscal create(CupomFiscalDocument cupomFiscalDocument) {
+        CupomFiscal cupomFiscal = new CupomFiscal();
+        BufferedImage image = base64ToImage(cupomFiscalDocument.getBase64File());
+        List<BufferedImage> processedImage = openCvService.processImage(image);
 
         processedImage.forEach(bufferedImage -> {
-            var payload = ocrService.readImage(bufferedImage);
-            var result = cupomFiscalParser.create(payload);
+            String payload = ocrService.readImage(bufferedImage);
+            CupomFiscal result = cupomFiscalParser.create(payload, bufferedImage);
 
             if (result != null) {
                 cupomFiscal.merge(result);
             }
         });
-
-//        if (!cupomFiscal.isComplete()) {
-//            throw new BadRequestException("Cupom inválido ou qualidade baixa");
-//        }
 
         cupomFiscal.setCupomFiscalDocument(cupomFiscalDocument);
         // save to database

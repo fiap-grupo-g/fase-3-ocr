@@ -18,6 +18,10 @@ public class CupomFiscal {
     @JoinColumn(name = "CUPOM_FISCAL_DOCUMENT_ID", nullable = false)
     private CupomFiscalDocument cupomFiscalDocument;
 
+    @OneToOne
+    @JoinColumn(name = "CUPOM_FISCAL_DOCUMENT_PROCESSED_ID", nullable = false)
+    private CupomFiscalDocumentProcessed documentProcessed;
+
     @Column(name = "CNPJ_ESTABELECIMENTO")
     private String cnpjEstabelecimento;
 
@@ -90,6 +94,16 @@ public class CupomFiscal {
         return this;
     }
 
+    public CupomFiscalDocumentProcessed getDocumentProcessed() {
+        return documentProcessed;
+    }
+
+    public CupomFiscal setDocumentProcessed(
+            CupomFiscalDocumentProcessed documentProcessed) {
+        this.documentProcessed = documentProcessed;
+        return this;
+    }
+
     public Boolean isComplete() {
         return cnpjEstabelecimento != null &&
                 produtos != null &&
@@ -97,39 +111,22 @@ public class CupomFiscal {
     }
 
     public void merge(CupomFiscal cupomFiscal) {
-        if (cnpjEstabelecimento == null) cnpjEstabelecimento = cupomFiscal.getCnpjEstabelecimento();
-        if (documentoConsumidor == null) documentoConsumidor = cupomFiscal.getDocumentoConsumidor();
-        if (valorTotal == null) valorTotal = cupomFiscal.getValorTotal();
-        if (produtos == null) produtos = cupomFiscal.getProdutos();
-        else produtos.addAll(cupomFiscal.getProdutos());
-    }
-
-    public Boolean isMoreCompleteThan(CupomFiscal cupomFiscal) {
-        if (isComplete()) return true;
-
-        int fieldsFound = 0;
-        int comparingFieldsFound = 0;
-
-        fieldsFound += cnpjEstabelecimento != null ? 1 : 0;
-        fieldsFound += documentoConsumidor != null ? 1 : 0;
-        fieldsFound += valorTotal != null ? 1 : 0;
-        fieldsFound += produtos != null ? produtos.size() : 0;
-
-        comparingFieldsFound += cupomFiscal.cnpjEstabelecimento != null ? 1 : 0;
-        comparingFieldsFound += cupomFiscal.documentoConsumidor != null ? 1 : 0;
-        comparingFieldsFound += cupomFiscal.valorTotal != null ? 1 : 0;
-        comparingFieldsFound += cupomFiscal.produtos != null ? cupomFiscal.produtos.size() : 0;
-
-        return comparingFieldsFound > fieldsFound;
+        if (cnpjEstabelecimento == null) cnpjEstabelecimento = cupomFiscal.cnpjEstabelecimento;
+        if (documentoConsumidor == null) documentoConsumidor = cupomFiscal.documentoConsumidor;
+        if (valorTotal == null) valorTotal = cupomFiscal.valorTotal;
+        if (produtos == null) produtos = cupomFiscal.produtos;
+        if (cupomFiscal.documentProcessed != null) documentProcessed = cupomFiscal.documentProcessed;
     }
 
     @Override
     public String toString() {
         return "CupomFiscal{" +
-                "cnpjEstabelecimento='" + cnpjEstabelecimento + '\'' +
+                "cupomFiscalDocumentProcessed=" + documentProcessed +
+                ", cnpjEstabelecimento='" + cnpjEstabelecimento + '\'' +
                 ", documentoConsumidor='" + documentoConsumidor + '\'' +
                 ", produtos=" + produtos +
                 ", valorTotal='" + valorTotal + '\'' +
+                ", rawValue='" + rawValue + '\'' +
                 '}';
     }
 }

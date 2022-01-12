@@ -19,7 +19,7 @@ public class AsyncConfig {
 
     @Bean(name = "OCRExecutor")
     public TaskExecutor taskExecutor() {
-        var taskExecutor = new ThreadPoolTaskExecutor();
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setMaxPoolSize(maxSize);
         taskExecutor.setQueueCapacity(queueSize);
         taskExecutor.afterPropertiesSet();

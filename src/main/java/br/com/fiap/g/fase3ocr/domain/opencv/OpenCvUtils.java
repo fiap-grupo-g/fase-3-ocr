@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_MEAN_C;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
@@ -26,7 +27,7 @@ public class OpenCvUtils {
 
     public static Mat bufferedImage2Mat(BufferedImage image) {
         try {
-            var byteArrayOutputStream = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "jpg", byteArrayOutputStream);
             byteArrayOutputStream.flush();
             return Imgcodecs.imdecode(new MatOfByte(byteArrayOutputStream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
@@ -39,7 +40,7 @@ public class OpenCvUtils {
 
     public static BufferedImage mat2BufferedImage(Mat matrix) {
         try {
-            var mob = new MatOfByte();
+            MatOfByte mob = new MatOfByte();
             Imgcodecs.imencode(".jpg", matrix, mob);
             return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
         } catch (IOException e) {
@@ -50,13 +51,13 @@ public class OpenCvUtils {
     }
 
     public static Mat toGrey(Mat image) {
-        var result = getNewMat(image);
+        Mat result = getNewMat(image);
         Imgproc.cvtColor(image, result, Imgproc.COLOR_RGB2GRAY, 0);
         return result;
     }
 
     public static Mat bilateralFilter(Mat image) {
-        var result = getNewMat(image);
+        Mat result = getNewMat(image);
         Imgproc.bilateralFilter(image, result,
                 BILATERAL_FILTER_PIXEL_RANGE,
                 BILATERAL_FILTER_SIGMA_COLOR,
@@ -65,7 +66,7 @@ public class OpenCvUtils {
     }
 
     public static Mat gaussianAdaptiveThresholding(Mat image) {
-        var result = getNewMat(image);
+        Mat result = getNewMat(image);
         Imgproc.adaptiveThreshold(image, result,
                 MAX_RGB_COLOR_VALUE,
                 Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
@@ -76,49 +77,52 @@ public class OpenCvUtils {
     }
 
     public static Mat morphologicalOpening(Mat image) {
-        var result = getNewMat(image);
-        var kernel = Mat.ones(MORPHOLOGICAL_KERNEL_SIZE, MORPHOLOGICAL_KERNEL_SIZE, CvType.CV_32F);
+        Mat result = getNewMat(image);
+        Mat kernel = Mat.ones(MORPHOLOGICAL_KERNEL_SIZE, MORPHOLOGICAL_KERNEL_SIZE, CvType.CV_32F);
         Imgproc.morphologyEx(image, result, Imgproc.MORPH_OPEN, kernel);
         return result;
     }
 
     public static void deSkew(Mat image) {
-        var img = getNewMat(image);
+        Mat img = getNewMat(image);
         //Binarization
         Imgproc.adaptiveThreshold(image, img, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, 40);
         //Inverting colors
         Core.bitwise_not(img, img);
-        var element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
         //Erosion
         Imgproc.erode(img, img, element);
         //Finding all white pixels
-        var wLocMat = Mat.zeros(img.size(), img.type());
+        Mat wLocMat = Mat.zeros(img.size(), img.type());
         Core.findNonZero(img, wLocMat);
 
-        var matOfPoint = new MatOfPoint(wLocMat);
-        var mat2f = new MatOfPoint2f();
+        MatOfPoint matOfPoint = new MatOfPoint(wLocMat);
+        MatOfPoint2f mat2f = new MatOfPoint2f();
         matOfPoint.convertTo(mat2f, CvType.CV_32FC2);
 
         //Getting rotated rect of white pixels
-        var rotatedRect = Imgproc.minAreaRect(mat2f);
-        var vertices = new Point[4];
+        RotatedRect rotatedRect = Imgproc.minAreaRect(mat2f);
+        Point[] vertices = new Point[4];
         rotatedRect.points(vertices);
-        var boxContours = new ArrayList<MatOfPoint>();
+        List<MatOfPoint> boxContours = new ArrayList<>();
         boxContours.add(new MatOfPoint(vertices));
         Imgproc.drawContours(img, boxContours, 0, new Scalar(128, 128, 128), -1);
+
         // final rotation angle
         rotatedRect.angle = rotatedRect.angle < -45 ? rotatedRect.angle + 90.f : rotatedRect.angle;
         //de-skewing
-        var center = new Point(image.width() / 2, image.height() / 2);
-        var rotImage = Imgproc.getRotationMatrix2D(center, rotatedRect.angle, 1.0);
-        var size = new Size(image.width(), image.height());
+        Point center = new Point(image.width() / 2, image.height() / 2);
+        Mat rotImage = Imgproc.getRotationMatrix2D(center, rotatedRect.angle, 1.0);
+        Size size = new Size(image.width(), image.height());
+
         Imgproc.warpAffine(image, image, rotImage, size, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
     }
 
     public static Mat reSize(Mat image) {
-        var result = getNewMat(image);
-        var size = new Size(result.width() * 1.25, result.height() * 1.25);
+        Mat result = getNewMat(image);
+        Size size = new Size(result.width() * 1.25, result.height() * 1.25);
         Imgproc.resize(image, result, size, 0, 0, Imgproc.INTER_LANCZOS4);
+
         return result;
     }
 

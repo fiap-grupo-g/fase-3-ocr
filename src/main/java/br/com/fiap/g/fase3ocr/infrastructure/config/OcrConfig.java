@@ -23,7 +23,7 @@ public class OcrConfig {
 
     @Bean
     public ITesseract tesseract() {
-        var tesseract = new Tesseract();
+        ITesseract tesseract = new Tesseract();
         tesseract.setLanguage(lang);
         tesseract.setDatapath(path);
 

@@ -5,3 +5,12 @@ spring:
     password: grupog
   h2:
     console.enabled: true
+
+tesseract:
+  lang: por
+  trained:
+    path: src/main/resources/tessdata
+async:
+  threadpool:
+    maxsize: 20
+    queuesize: 100
