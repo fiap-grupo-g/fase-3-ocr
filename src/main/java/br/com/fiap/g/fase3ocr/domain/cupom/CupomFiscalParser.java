@@ -4,17 +4,18 @@ import br.com.fiap.g.fase3ocr.domain.cupom.regex.CnpjFinder;
 import br.com.fiap.g.fase3ocr.domain.cupom.regex.CpfFinder;
 import br.com.fiap.g.fase3ocr.domain.cupom.regex.ProdutosFinder;
 import br.com.fiap.g.fase3ocr.domain.cupom.regex.ValorTotalFinder;
-import br.com.fiap.g.fase3ocr.domain.ocr.OcrPayloadFactory;
+import org.springframework.stereotype.Component;
+
 import java.awt.image.BufferedImage;
 
-public class CupomFiscalFactory implements OcrPayloadFactory<CupomFiscal> {
+@Component
+public class CupomFiscalParser {
 
     private CnpjFinder cnpjFinder;
     private CpfFinder cpfFinder;
     private ValorTotalFinder valorTotalFinder;
     private ProdutosFinder produtosFinder;
 
-    @Override
     public CupomFiscal create(String payload, BufferedImage image) {
         CupomFiscal cupomFiscal = new CupomFiscal();
         cnpjFinder = new CnpjFinder(payload);

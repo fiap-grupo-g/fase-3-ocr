@@ -18,12 +18,11 @@ public class ProdutosFinder extends RegexFinder {
     }
 
     public List<Produto> get() {
+        List<Produto> produtos = new ArrayList<>();
         Matcher m = matcher(PRODUCT_LINES);
         if (m.find()) {
             String productLines = m.group(m.groupCount() - 1);
-            List<Produto> produtos = new ArrayList<>();
             Boolean isLast = false;
-
             while (!isLast) {
                 Pattern p2 = Pattern.compile(PRODUCT_LINE_MIDDLE);
                 Matcher m2 = p2.matcher(productLines);
@@ -42,6 +41,6 @@ public class ProdutosFinder extends RegexFinder {
             }
             return produtos;
         }
-        return null;
+        return produtos;
     }
 }
