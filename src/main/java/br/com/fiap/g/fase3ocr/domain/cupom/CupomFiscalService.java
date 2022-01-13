@@ -2,7 +2,6 @@ package br.com.fiap.g.fase3ocr.domain.cupom;
 
 import br.com.fiap.g.fase3ocr.domain.ocr.OcrService;
 import br.com.fiap.g.fase3ocr.domain.opencv.OpenCvService;
-import io.undertow.util.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
