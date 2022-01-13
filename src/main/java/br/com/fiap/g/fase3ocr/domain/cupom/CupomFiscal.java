@@ -104,17 +104,11 @@ public class CupomFiscal {
         return this;
     }
 
-    public Boolean isComplete() {
-        return cnpjEstabelecimento != null &&
-                produtos != null &&
-                valorTotal != null;
-    }
-
     public void merge(CupomFiscal cupomFiscal) {
         if (cnpjEstabelecimento == null) cnpjEstabelecimento = cupomFiscal.cnpjEstabelecimento;
         if (documentoConsumidor == null) documentoConsumidor = cupomFiscal.documentoConsumidor;
         if (valorTotal == null) valorTotal = cupomFiscal.valorTotal;
-        if (produtos == null) produtos = cupomFiscal.produtos;
+        if (produtos.isEmpty()) produtos = cupomFiscal.produtos;
         if (cupomFiscal.documentProcessed != null) documentProcessed = cupomFiscal.documentProcessed;
     }
 
